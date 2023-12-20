@@ -269,9 +269,9 @@ public class QuerydslBasicTest {
     @Test
     void join() {
         List<Member> result = queryFactory
-                .selectFrom(QMember.member)
-                .join(QMember.member.team, QTeam.team)
-                .where(QTeam.team.name.eq("teamA"))
+                .selectFrom(member)
+                .join(member.team, team)
+                .where(team.name.eq("teamA"))
                 .fetch();
 
         assertThat(result)
@@ -298,5 +298,81 @@ public class QuerydslBasicTest {
         assertThat(result)
                 .extracting("username")
                 .containsExactly("teamA", "teamB");
+    }
+
+    /**
+     * 예) 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회
+     * JPQL: SELECT m, t FROM Member m LEFT JOIN m.team t on t.name = 'teamA'
+     * SQL: SELECT m.*, t.* FROM Member m LEFT JOIN Team t ON m.TEAM_ID=t.id and t.name='teamA'
+     */
+    @Test
+    void join_on_filtering() {
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(member.team, team).on(team.name.eq("teamA"))
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+
+    /**
+     * 예) 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회
+     * JPQL: SELECT m, t FROM Member m INNER JOIN m.team t on t.name = 'teamA'
+     * SQL: SELECT m.*, t.* FROM Member m INNER JOIN Team t ON m.TEAM_ID=t.id and t.name='teamA'
+     */
+    @Test
+    void inner_join_on_filtering() {
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .join(member.team, team).on(team.name.eq("teamA"))
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+
+    /**
+     * 예) 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회
+     * JPQL: SELECT m FROM Member m INNER JOIN m.team t on t.name = 'teamA'
+     * SQL: SELECT m.* FROM Member m INNER JOIN Team t ON m.TEAM_ID=t.id and t.name='teamA'
+     */
+    @Test
+    void from_member_inner_join_on_filtering() {
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .join(member.team, team).on(team.name.eq("teamA"))
+                .fetch();
+
+        for (Member m : result) {
+            System.out.println("m = " + m);
+        }
+    }
+
+    /**
+     * 2. 연관관계 엇는 엔티티 외부 조인
+     * 예) 회원의 이름과 팀의 이름이 같은 대상 외부 조인
+     * JPQL: SELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name
+     * SQL: SELECT m.*, t.* FROM Member m LEFT JOIN Team t ON m.username = t.name
+     */
+    @Test
+    void join_on_no_relation() {
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+        List<Tuple> result = queryFactory
+                .select(member, team)
+                .from(member)
+                .leftJoin(team).on(member.username.eq(team.name))
+                .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
     }
 }
