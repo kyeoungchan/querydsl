@@ -1,4 +1,4 @@
-package study.querydsl.basic;
+package study.querydsl.grammar.intermediate;
 
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
