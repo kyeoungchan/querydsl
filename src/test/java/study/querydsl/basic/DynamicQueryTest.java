@@ -1,10 +1,10 @@
 package study.querydsl.basic;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -90,5 +90,64 @@ public class DynamicQueryTest {
                 .selectFrom(member)
                 .where(builder)
                 .fetch();
+    }
+
+    @Test
+    void dynamicQuery_WhereParam() {
+        String usernameParam = "member1";
+        Integer ageParam = 10;
+
+        List<Member> result = searchMember2(usernameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0).getUsername()).isEqualTo(usernameParam);
+        assertThat(result.get(0).getAge()).isEqualTo(ageParam);
+    }
+
+    @Test
+    void dynamicQuery_WhereParam_allEq() {
+        String usernameParam = "member1";
+        Integer ageParam = 10;
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .where(allEq(usernameParam, ageParam))
+                .fetch();
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0).getUsername()).isEqualTo(usernameParam);
+        assertThat(result.get(0).getAge()).isEqualTo(ageParam);
+    }
+
+    @Test
+    @DisplayName(".and() 연산에 null이 입력되어도 무시돼서 동적쿼리를 잘 실행한다.")
+    void dynamicQuery_WhereParam_allEq_with_null() {
+        String usernameParam = "member1";
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .where(allEq(usernameParam, null))
+                .fetch();
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0).getUsername()).isEqualTo(usernameParam);
+        assertThat(result.get(0).getAge()).isEqualTo(10);
+    }
+
+    private List<Member> searchMember2(String usernameCond, Integer ageCond) {
+        return queryFactory
+                .selectFrom(member)
+                .where(usernameEq(usernameCond), ageEq(ageCond))
+                // where에 null이 들어가면 기본적으로 무시가 된다.
+                .fetch();
+    }
+
+    private BooleanExpression usernameEq(String usernameCond) {
+        return usernameCond != null ? member.username.eq(usernameCond) : null;
+    }
+
+    private BooleanExpression ageEq(Integer ageCond) {
+        return ageCond != null ? member.age.eq(ageCond) : null;
+    }
+
+    private BooleanExpression allEq(String usernameCond, Integer ageCond) {
+        return usernameEq(usernameCond).and(ageEq(ageCond));
     }
 }
