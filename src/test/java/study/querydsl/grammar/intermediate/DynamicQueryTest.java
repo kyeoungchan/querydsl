@@ -1,4 +1,4 @@
-package study.querydsl.basic;
+package study.querydsl.grammar.intermediate;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
