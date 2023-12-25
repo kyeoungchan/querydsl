@@ -80,21 +80,39 @@
               where
                   m2_0.age>?)
   ```
-- `selectSubQuery()` 쿼리문
-```sql
-/* select
-        member1.username,
-        (select
-            avg(memberSub.age) 
-        from
-            Member memberSub) 
-    from
-        Member member1 */ select
-            m1_0.username,
+- `selectSubQuery()`
+  - 쿼리문
+    ```sql
+    /* select
+            member1.username,
             (select
-                avg(cast(m2_0.age as float(53))) 
+                avg(memberSub.age) 
             from
-                member m2_0) 
+                Member memberSub) 
         from
-            member m1_0
-```
+            Member member1 */ select
+                m1_0.username,
+                (select
+                    avg(cast(m2_0.age as float(53))) 
+                from
+                    member m2_0) 
+            from
+                member m1_0
+    ```
+  - 콘솔 출력
+    ```text
+    username = member1
+    age = 25.0
+    username = member2
+    age = 25.0
+    username = member3
+    age = 25.0
+    username = member4
+    age = 25.0
+    ```
+- from 절의 서브쿼리
+  - JPA JPQL 서브쿼리의 한계점으로 from 절의 서브쿼리는 지원하지 않는다.
+  - 해결 방안
+    1. 서브쿼리를 join으로 변경한다. (가능한 상황도 있고, 불가능한 상황도 있다.)
+    2. 애플리케이션에서 쿼리를 2번 분리해서 실행한다.
+    3. nativeSQL을 사용한다.
