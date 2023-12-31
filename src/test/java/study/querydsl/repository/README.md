@@ -1,3 +1,7 @@
+### `extracting()`
+- `assertThat()` 뒤에 `extracting()`을 활용하여 확인하고자하는 필드만 접근이 가능하다.
+- 즉, `assertThat(result.get(0).getUsername()).isEqualTo(useranme)` 이런식으로 안 해도 된다는 뜻이다.
+
 ### `searchTest()`
 - 쿼리문
     ```sql
