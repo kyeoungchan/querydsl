@@ -1,4 +1,4 @@
-package study.querydsl.repository;
+package study.querydsl.repository.purejpa;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -11,6 +11,7 @@ import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.Team;
+import study.querydsl.repository.MemberJpaRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
