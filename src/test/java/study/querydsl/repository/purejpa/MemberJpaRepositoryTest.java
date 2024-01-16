@@ -11,7 +11,6 @@ import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.dto.MemberTeamDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.Team;
-import study.querydsl.repository.MemberJpaRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
