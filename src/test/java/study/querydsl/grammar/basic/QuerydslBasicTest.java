@@ -480,8 +480,8 @@ public class QuerydslBasicTest {
         }
     }
 
-
     @Test
+    @DisplayName("상수 더하기 테스트")
     void constant() {
         Tuple result = queryFactory
                 .select(member.username, Expressions.constant("A"))
@@ -493,7 +493,9 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    @DisplayName("문자 더하기 테스트")
     void concat() {
+        // {username}_{age}
         String result = queryFactory
                 .select(member.username.concat("_").concat(member.age.stringValue()))
                 .from(member)
