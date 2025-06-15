@@ -4,6 +4,7 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -424,6 +425,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    @DisplayName("단순한 Case문 테스트")
     void basicCase() {
         List<String> result = queryFactory
                 .select(member.age
@@ -440,6 +442,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    @DisplayName("복잡한 Case문 테스트")
     void complicateCase() {
         List<String> result = queryFactory
                 .select(new CaseBuilder()
@@ -454,6 +457,29 @@ public class QuerydslBasicTest {
             System.out.println("s = " + s);
         }
     }
+
+    @Test
+    @DisplayName("Case문을 순서를 지정해서 출력하기 테스트")
+    void customOrderedCase() {
+        NumberExpression<Integer> rankPath = new CaseBuilder()
+                .when(member.age.between(0, 20)).then(2)
+                .when(member.age.between(21, 30)).then(1)
+                .otherwise(3);
+
+        List<Tuple> result = queryFactory
+                .select(member.username, member.age, rankPath)
+                .from(member)
+                .orderBy(rankPath.desc())
+                .fetch();
+
+        for (Tuple tuple : result) {
+            String username = tuple.get(member.username);
+            Integer age = tuple.get(member.age);
+            Integer rank = tuple.get(rankPath);
+            System.out.println("username = " + username + ", age = " + age + ", rank = " + rank);
+        }
+    }
+
 
     @Test
     void constant() {
