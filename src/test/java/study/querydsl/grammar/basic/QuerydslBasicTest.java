@@ -331,8 +331,13 @@ public class QuerydslBasicTest {
         List<Tuple> result = queryFactory
                 .select(member, team)
                 .from(member)
-                .join(member.team, team).on(team.name.eq("teamA"))
+                .join(member.team, team)
+//                .on(team.name.eq("teamA"))
+                .where(team.name.eq("teamA"))
                 .fetch();
+        // on절과 where절 중 하나만 주석처리하면 결과가 같다.
+        // 따라서 innerJoin에 on절을 사용하는 것보다는 익숙한 where절을 사용하는 것이 좋다.
+        // on절은 외부조인에서만 사용하자.
 
         for (Tuple tuple : result) {
             System.out.println("tuple = " + tuple);
@@ -357,7 +362,7 @@ public class QuerydslBasicTest {
     }
 
     /**
-     * 2. 연관관계 엇는 엔티티 외부 조인
+     * 2. 연관관계 없는 엔티티 외부 조인
      * 예) 회원의 이름과 팀의 이름이 같은 대상 외부 조인
      * JPQL: SELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name
      * SQL: SELECT m.*, t.* FROM Member m LEFT JOIN Team t ON m.username = t.name
