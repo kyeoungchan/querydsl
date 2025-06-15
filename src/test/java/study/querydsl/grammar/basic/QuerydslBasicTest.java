@@ -11,6 +11,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnit;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -388,6 +389,7 @@ public class QuerydslBasicTest {
     EntityManagerFactory emf;
 
     @Test
+    @DisplayName("페치조인 미적용 테스트")
     void fetchJoinNo() {
         em.flush();
         em.clear();
@@ -404,6 +406,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    @DisplayName("페치조인 적용 테스트")
     void fetchJoinUse() {
         em.flush();
         em.clear();
