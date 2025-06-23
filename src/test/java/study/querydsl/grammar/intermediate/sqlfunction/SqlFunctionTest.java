@@ -55,6 +55,7 @@ public class SqlFunctionTest {
         List<String> replacedNames = List.of("M1", "M2", "M3", "M4");
         for (int i = 0; i < result.size(); i++) {
             assertThat(result.get(i)).isEqualTo(replacedNames.get(i));
+            System.out.println("replacedNames.get(i) = " + replacedNames.get(i));
         }
         assertThat(result).containsExactlyElementsOf(replacedNames);
     }
