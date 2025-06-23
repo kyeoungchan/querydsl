@@ -46,6 +46,12 @@ public class QuerydslBulkOperatorTest {
 //    @Commit
     @DisplayName("벌크 연산을 수행하면 꼭 영속성 콘텍스트를 초기화시켜야 한다.")
     void bulkUpdate() {
+
+        // member1 = 10 -> 비회원
+        // member2 = 20 -> 비회원
+        // member3 = 30 -> 유지
+        // member4 = 40 -> 유지
+
         long count = queryFactory
                 .update(member)
                 .set(member.username, "비회원")
