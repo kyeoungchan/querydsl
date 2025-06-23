@@ -507,6 +507,17 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    void simpleProjection() {
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+                .fetch();
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
     void tupleProjection() {
         List<Tuple> result = queryFactory
                 .select(member.username, member.age)
