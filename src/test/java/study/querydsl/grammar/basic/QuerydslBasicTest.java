@@ -4,6 +4,7 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -11,6 +12,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnit;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -331,8 +333,13 @@ public class QuerydslBasicTest {
         List<Tuple> result = queryFactory
                 .select(member, team)
                 .from(member)
-                .join(member.team, team).on(team.name.eq("teamA"))
+                .join(member.team, team)
+//                .on(team.name.eq("teamA"))
+                .where(team.name.eq("teamA"))
                 .fetch();
+        // on절과 where절 중 하나만 주석처리하면 결과가 같다.
+        // 따라서 innerJoin에 on절을 사용하는 것보다는 익숙한 where절을 사용하는 것이 좋다.
+        // on절은 외부조인에서만 사용하자.
 
         for (Tuple tuple : result) {
             System.out.println("tuple = " + tuple);
@@ -357,7 +364,7 @@ public class QuerydslBasicTest {
     }
 
     /**
-     * 2. 연관관계 엇는 엔티티 외부 조인
+     * 2. 연관관계 없는 엔티티 외부 조인
      * 예) 회원의 이름과 팀의 이름이 같은 대상 외부 조인
      * JPQL: SELECT m, t FROM Member m LEFT JOIN Team t on m.username = t.name
      * SQL: SELECT m.*, t.* FROM Member m LEFT JOIN Team t ON m.username = t.name
@@ -383,6 +390,7 @@ public class QuerydslBasicTest {
     EntityManagerFactory emf;
 
     @Test
+    @DisplayName("페치조인 미적용 테스트")
     void fetchJoinNo() {
         em.flush();
         em.clear();
@@ -399,6 +407,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    @DisplayName("페치조인 적용 테스트")
     void fetchJoinUse() {
         em.flush();
         em.clear();
@@ -416,6 +425,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    @DisplayName("단순한 Case문 테스트")
     void basicCase() {
         List<String> result = queryFactory
                 .select(member.age
@@ -432,6 +442,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    @DisplayName("복잡한 Case문 테스트")
     void complicateCase() {
         List<String> result = queryFactory
                 .select(new CaseBuilder()
@@ -448,6 +459,29 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    @DisplayName("Case문을 순서를 지정해서 출력하기 테스트")
+    void customOrderedCase() {
+        NumberExpression<Integer> rankPath = new CaseBuilder()
+                .when(member.age.between(0, 20)).then(2)
+                .when(member.age.between(21, 30)).then(1)
+                .otherwise(3);
+
+        List<Tuple> result = queryFactory
+                .select(member.username, member.age, rankPath)
+                .from(member)
+                .orderBy(rankPath.desc())
+                .fetch();
+
+        for (Tuple tuple : result) {
+            String username = tuple.get(member.username);
+            Integer age = tuple.get(member.age);
+            Integer rank = tuple.get(rankPath);
+            System.out.println("username = " + username + ", age = " + age + ", rank = " + rank);
+        }
+    }
+
+    @Test
+    @DisplayName("상수 더하기 테스트")
     void constant() {
         Tuple result = queryFactory
                 .select(member.username, Expressions.constant("A"))
@@ -459,7 +493,9 @@ public class QuerydslBasicTest {
     }
 
     @Test
+    @DisplayName("문자 더하기 테스트")
     void concat() {
+        // {username}_{age}
         String result = queryFactory
                 .select(member.username.concat("_").concat(member.age.stringValue()))
                 .from(member)
@@ -468,6 +504,17 @@ public class QuerydslBasicTest {
 
         System.out.println("result = " + result);
         assertThat(result).isEqualTo("member1_10");
+    }
+
+    @Test
+    void simpleProjection() {
+        List<String> result = queryFactory
+                .select(member.username)
+                .from(member)
+                .fetch();
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
     }
 
     @Test
